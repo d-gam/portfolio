@@ -1,0 +1,19 @@
+Functional test #1
+
+UTest platform training Test Case
+
+MacOS Monterey 12.7.6 - Search Results Page - Sorting by Descending price gives incorrect results
+
+Action Performed
+1. Visit https://www.*protectingwebsite*.es/
+
+2. Optional: Log in
+3. In the search field, type: iphone
+4. Sort by: precios caros a barato
+5. Scroll down until you find the first example: *protecting item name* para Iphone.
+
+Expected Result
+The page should sort the items by final price and show the more expensive ones before the cheaper ones
+
+Actual Result
+The page is sorting the items in the wrong order as is considering the original price to place them, rather than the discounted one.
