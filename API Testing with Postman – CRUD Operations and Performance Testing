@@ -1,0 +1,13 @@
+Feb 2025 - Feb 2025Feb 2025 - Feb 2025
+• Utilized Postman to interact with the JSON Placeholder REST API and perform various API operations,
+including GET, POST, PUT, and DELETE to manage data.
+• Created a Postman collection to organize and store all API requests for streamlined testing and
+execution.
+• Implemented CRUD operations
+• Developed and executed a collection-level script to check the response time for each API request,
+ensuring it was under 250 milliseconds. The script automatically flagged requests that exceeded the time
+limit.
+• Verified the accuracy, reliability, and performance of API responses, enhancing skills in API testing and
+automation.
+
+https://www.postman.com/dgam/correlation-one/collection/dw9u2zf/mini-project
