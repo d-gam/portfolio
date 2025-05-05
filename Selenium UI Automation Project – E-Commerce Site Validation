@@ -1,0 +1,94 @@
+Mar 2025 - Mar 2025Mar 2025 - Mar 2025
+• Developed a Selenium UI automation script to validate product descriptions on a fake e-commerce site(Swag Labs).
+• Gained a thorough understanding of the site’s layout and elements, including product images,descriptions, and buttons, by manually exploring the site.
+• Created automated tests to log in and validate product descriptions, ensuring that the displayed text matched the expected values for each product.
+• Followed best practices for test automation, ensuring scalability and reliability of the script by leveraging previous lessons and code examples.
+
+
+package swagLabs;
+
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
+import java.io.ObjectInputStream.GetField;
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.DataProvider;
+
+public class swagLabs {
+
+// Wed info	
+WebDriver driver;
+String webUrl = "https://www.saucedemo.com/";
+
+//login
+String userField = "user-name";
+String passwordField = "password";
+String username = "standard_user";
+String password = "secret_sauce";
+
+	
+
+	@DataProvider
+	public String [] sauceItems()
+	{
+		String [] data = new String[6];
+		
+		data[0] = "Sauce Labs Backpack";
+		data[1] = "Sauce Labs Bike Light";
+		data[2] = "Sauce Labs Bolt T-Shirt";
+		data[3] = "Sauce Labs Fleece Jacket";
+		data[4] = "Sauce Labs Onesie";
+		data[5] = "Test.allTheThings() T-Shirt (Red)";
+		
+		return data;
+		
+	}
+	
+	@BeforeTest
+
+	public void setup() {
+		driver = new ChromeDriver(); 
+		driver.get(webUrl);
+	
+		//get username and password and populate fields then click login
+		
+		driver.findElement(By.id("user-name")).sendKeys(username);
+		driver.findElement(By.id("password")).sendKeys(password);
+		driver.findElement(By.id("login-button")).click();
+		
+		// checking user and pass are correct and website has been accessed
+		System.out.println("Login successful");
+	
+	
+	}
+	
+	
+	@Test (dataProvider="sauceItems")
+	
+	public void descriptionCheck(String item) {
+		
+		
+        // locate the item and check text
+        String text = driver.findElement(By.linkText(item)).getText();
+        Assert.assertEquals(text,  item);
+        
+	}
+	
+	
+	@AfterTest
+	public void afterTest () {
+		
+		// ending test and closing window
+		driver.quit();
+		
+	}
+}
