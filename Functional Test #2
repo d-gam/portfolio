@@ -1,0 +1,29 @@
+Reporting bugs in UTest for customer. App on Ipad Air - iPadOS 17.6.1, Wi-Fi  environment 
+
+Action Performed
+1. Opened the ** app
+2. Selecting Match Centre Tab
+3. Selecting a filter available
+4. Selecting one team from the list
+5. Selecting Statistic or other page inside the team
+6. Going back to previous page
+
+Expected Result
+The app should lead you to the previous page
+
+Actual Result
+The app leads you 2 pages back
+
+Attachments:
+I did upload an mp4 video
+I did upload a highlighted screenshot of the issue.
+I did upload a mobile device log in .txt or .log format
+
+I used MacBook Console to collect the log
+
+
+Further info:
+App Language 
+Spanish
+App Version 
+6.2.8
