@@ -1,0 +1,28 @@
+Functional test case received through UTest. Tested object: famous clothing and accessories website.
+
+Title if the issue: Shop Cart icon is not resetting to 0 once all items are removed
+
+Action Performed:
+1.  Open the in scope website: https://www.*redacted website*.com/es/
+2.  Add 1 or more items to cart
+3.  Remove items from cart
+4. Go back to previous page
+5. Check the cart icon counter in header section
+
+Expected Result:
+Cart should show 0 items
+
+Actual Result:
+Cart is showing total items even after deleting them (if we add 2 items to cart and then delete them, cart still shows 2 once we go back one page)
+
+
+Environment
+macOS Monterey 12.7.6 - Safari
+
+
+Valuable: very valuable
+Creation Date: 10/17/2025
+Bug Type: Functional
+Frequency: Every Time
+Severity: Medium
+
