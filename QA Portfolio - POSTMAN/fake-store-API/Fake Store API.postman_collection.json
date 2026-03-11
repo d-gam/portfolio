@@ -1,0 +1,501 @@
+{
+  "info": {
+    "_postman_id": "146a146e-1cd7-4cbb-a695-913d847966ee",
+    "name": "Fake Store API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "42375182"
+  },
+  "item": [
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "get-all-products",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is a JSON array\", function () {",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"Products list is not empty\", function () {",
+                  "    pm.expect(pm.response.json().length).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test(\"Each product has required fields\", function () {",
+                  "    const products = pm.response.json();",
+                  "    products.forEach(function(product) {",
+                  "        pm.expect(product).to.have.property('id');",
+                  "        pm.expect(product).to.have.property('title');",
+                  "        pm.expect(product).to.have.property('price');",
+                  "        pm.expect(product).to.have.property('category');",
+                  "    });",
+                  "});",
+                  "",
+                  "pm.test(\"Product prices are positive numbers\", function () {",
+                  "    const products = pm.response.json();",
+                  "    products.forEach(function(product) {",
+                  "        pm.expect(product.price).to.be.a('number').and.to.be.above(0);",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-single-product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Correct product ID is returned\", function () {",
+                  "    const product = pm.response.json();",
+                  "    pm.expect(product.id).to.eql(parseInt(pm.environment.get(\"productId\")));",
+                  "});",
+                  "",
+                  "pm.test(\"Product has a valid price\", function () {",
+                  "    const product = pm.response.json();",
+                  "    pm.expect(product.price).to.be.a('number').and.above(0);",
+                  "});",
+                  "",
+                  "// 💡 This is a Pre-request script — saves product price as variable for later",
+                  "// Write this in Scripts → Pre-request:",
+                  "// pm.environment.set(\"productPrice\", pm.response.json().price);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-products-by-category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"All products belong to electronics category\", function () {",
+                  "    const products = pm.response.json();",
+                  "    products.forEach(function(product) {",
+                  "        pm.expect(product.category).to.eql(\"electronics\");",
+                  "    });",
+                  "});",
+                  "",
+                  "pm.test(\"At least one product returned\", function () {",
+                  "    pm.expect(pm.response.json().length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/category/electronics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "category",
+                "electronics"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "gt-limited-products",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Returns exactly 5 products\", function () {",
+                  "    pm.expect(pm.response.json().length).to.eql(5);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "get-single-user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"User has required fields\", function () {",
+                  "    const user = pm.response.json();",
+                  "    pm.expect(user).to.have.property('id');",
+                  "    pm.expect(user).to.have.property('email');",
+                  "    pm.expect(user).to.have.property('username');",
+                  "    pm.expect(user).to.have.property('address');",
+                  "});",
+                  "",
+                  "pm.test(\"Email format is valid\", function () {",
+                  "    const user = pm.response.json();",
+                  "    pm.expect(user.email).to.include('@');",
+                  "});",
+                  "",
+                  "// Save username for later use",
+                  "pm.test(\"Save username to environment\", function () {",
+                  "    const user = pm.response.json();",
+                  "    pm.environment.set(\"username\", user.username);",
+                  "    pm.expect(pm.environment.get(\"username\")).to.not.be.empty;",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "login-user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\"username\": \"mor_2314\",\n\"password\": \"83r5^_\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Carts",
+      "item": [
+        {
+          "name": "get-user-cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Cart belongs to correct user\", function () {",
+                  "    const carts = pm.response.json();",
+                  "    carts.forEach(function(cart) {",
+                  "        pm.expect(cart.userId).to.eql(parseInt(pm.environment.get(\"userId\")));",
+                  "    });",
+                  "});",
+                  "",
+                  "pm.test(\"Cart contains products\", function () {",
+                  "    const carts = pm.response.json();",
+                  "    pm.expect(carts[0].products.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test(\"Each cart item has productId and quantity\", function () {",
+                  "    const products = pm.response.json()[0].products;",
+                  "    products.forEach(function(item) {",
+                  "        pm.expect(item).to.have.property('productId');",
+                  "        pm.expect(item).to.have.property('quantity');",
+                  "        pm.expect(item.quantity).to.be.above(0);",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/carts/user/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts",
+                "user",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "add-new-cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"userId\": 1,\n    \"date\": \"2026-03-11\",\n    \"products\": [\n        { \"productId\": 1, \"quantity\": 2 },\n        { \"productId\": 3, \"quantity\": 1 }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/carts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "carts"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Negative Tests",
+      "item": [
+        {
+          "name": "get-non-existent-product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Returns null or 404 for invalid product\", function () {",
+                  "    const status = pm.response.code;",
+                  "    const body = pm.response.text().trim();",
+                  "    ",
+                  "    const isNotFound = status === 404;",
+                  "    const isEmptyBody = body.length === 0;",
+                  "    const isNullBody = body === \"null\";",
+                  "    ",
+                  "    pm.expect(isNotFound || isEmptyBody || isNullBody).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/99999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "99999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "login-with-wrong-credentials",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"No token returned for invalid credentials\", function () {",
+                  "    const body = pm.response.text();",
+                  "    pm.expect(pm.response.code).to.equal(401);",
+                  "});",
+                  "",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"fakeuser\",\n    \"password\": \"wrongpassword\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
