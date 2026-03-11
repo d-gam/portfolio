@@ -1,22 +1,20 @@
-# 🧪 Postman QA Portfolio — Phase 2: Fake Store API
+Fake Store API
 
-**Author:** Dario Gambino  
-**Tool:** Postman (Desktop)  
 **API Under Test:** [Fake Store API](https://fakestoreapi.com)  
 **Environment:** FakeStore DEV  
 **Date:** March 2026
 
 ---
 
-## 📌 Project Overview
+Project Overview
 
-This project is part of a structured QA automation portfolio built to demonstrate real-world API testing skills using Postman. Phase 2 focuses on an e-commerce API, simulating the kind of testing relevant to retail and loyalty platforms (e.g. products, users, carts, authentication).
+This project is part of a structured QA automation portfolio built to demonstrate real-world API testing skills using Postman. It focuses on an e-commerce API, simulating the kind of testing relevant to retail and loyalty platforms (e.g. products, users, carts, authentication).
 
 The goal was not just to make requests work, but to think like a QA engineer: validate business logic, handle edge cases, write meaningful assertions, and document findings professionally.
 
 ---
 
-## 🗂️ Collection Structure
+Collection Structure
 
 ```
 Fake Store API
@@ -38,7 +36,7 @@ Fake Store API
 
 ---
 
-## ✅ Test Run Summary
+Test Run Summary
 
 | Metric | Result |
 |---|---|
@@ -50,9 +48,9 @@ Fake Store API
 
 ---
 
-## 🔬 Test Coverage
+Test Coverage
 
-### Products
+Products
 - Status code validation (200)
 - Response time under 2000ms
 - Response is a valid JSON array
@@ -62,25 +60,25 @@ Fake Store API
 - Category filter returns only matching products
 - Limit parameter returns correct number of results
 
-### Users & Authentication
+Users & Authentication
 - Login returns a token on valid credentials
 - Token is a non-empty string
 - POST requests correctly return `201 Created`
 
-### Carts
+Carts
 - Cart retrieval returns correct `userId`
 - New cart creation returns `201 Created` with a cart `id`
 
-### Negative Tests
+Negative Tests
 - Invalid product ID is handled gracefully (see Bug Report below)
 - Login with wrong credentials returns `401 Unauthorized`
 - Error response does not contain a token
 
 ---
 
-## 🐛 Bug Report
+🐛 Bug Report
 
-### BUG-001 — Invalid Product ID Returns 200 with Empty Body
+ BUG-001 — Invalid Product ID Returns 200 with Empty Body
 
 | Field | Detail |
 |---|---|
@@ -118,7 +116,7 @@ This is a known limitation of the Fake Store API mock server. In a production en
 
 ---
 
-### BUG-002 — Login Error Response Returns Plain Text Instead of JSON
+BUG-002 — Login Error Response Returns Plain Text Instead of JSON
 
 | Field | Detail |
 |---|---|
@@ -149,7 +147,7 @@ Inconsistent response format across the API. Clients expecting JSON will fail to
 
 ---
 
-## 💡 Key Learnings & QA Observations
+Key Learnings & QA Observations
 
 - **POST requests return `201`, not `200`** — A common misconception. `201 Created` is the semantically correct HTTP status for resource creation. Tests should assert the right code, not just assume `200`.
 
@@ -161,30 +159,14 @@ Inconsistent response format across the API. Clients expecting JSON will fail to
 
 ---
 
-## 🚀 How to Run This Collection
+How to Run This Collection
 
-### Option 1 — Postman Desktop (Manual)
+ Postman Desktop (Manual)
 1. Download and install [Postman](https://www.postman.com/downloads/)
-2. Import `FakeStoreAPI.postman_collection.json`
+2. Import `Fake Store API.postman_collection.json`
 3. Import `FakeStore_DEV.postman_environment.json`
 4. Select `FakeStore DEV` as the active environment
 5. Click **Run Collection**
-
-### Option 2 — Newman (Command Line)
-```bash
-# Install Newman
-npm install -g newman
-
-# Run the collection
-newman run FakeStoreAPI.postman_collection.json \
-  -e FakeStore_DEV.postman_environment.json
-
-# Run with HTML report
-npm install -g newman-reporter-htmlextra
-newman run FakeStoreAPI.postman_collection.json \
-  -e FakeStore_DEV.postman_environment.json \
-  -r htmlextra
-```
 
 ---
 
@@ -196,23 +178,15 @@ newman run FakeStoreAPI.postman_collection.json \
 
 ---
 
-## 📁 Repository Structure
+📁 Repository Structure
 
 ```
 postman-qa-portfolio/
 ├── FakeStoreAPI.postman_collection.json
 ├── FakeStore_DEV.postman_environment.json
 ├── README.md
-└── screenshots/
-    └── test-run-results.png
+├──FakeStoreAPIResults.png
 ```
 
 ---
 
-## 🔗 Related Projects
-
-- [Phase 1 — REST Countries API](../rest-countries/) — Collection structure, environment variables, basic test scripts
-
----
-
-*Part of an ongoing QA Automation portfolio. Built to demonstrate real API testing skills for roles requiring Postman, REST API testing, and CI/CD integration.*
