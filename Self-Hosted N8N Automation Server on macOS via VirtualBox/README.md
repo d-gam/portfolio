@@ -1,12 +1,12 @@
 # 🤖 Self-Hosted N8N Automation Server on macOS via VirtualBox
 
-> Run a fully local N8N workflow automation server on your Mac using VirtualBox, Ubuntu 24, Docker, and EasyPanel — no cloud required.
+> Run a fully local N8N workflow automation server on Mac using VirtualBox, Ubuntu 24, Docker, and EasyPanel — no cloud required.
 
 ---
 
 ## 📋 Overview
 
-This project documents how to set up a **self-hosted N8N instance** running inside a Linux virtual machine on macOS, accessible directly from your Mac browser. It covers the full stack from VM creation to browser access, including networking configuration and common troubleshooting steps.
+This project documents how to set up a **self-hosted N8N instance** running inside a Linux virtual machine on macOS, accessible directly from Mac browser. It covers the full stack from VM creation to browser access, including networking configuration and common troubleshooting steps.
 
 ---
 
@@ -41,8 +41,33 @@ Download and install [VirtualBox](https://www.virtualbox.org/) on your Mac.
 - In VirtualBox: New VM → select the ISO → allocate at least **4GB RAM** and **25GB disk**
 - Complete the Ubuntu installation inside the VM
 
-### 3. Install Docker inside Ubuntu
+Note: I have followed this tutorial to successfully install Ubuntu in my VM: https://www.youtube.com/watch?v=dKJ3Wee8w9w
+
+
+### 3. Install Docker and EasyPanel inside Ubuntu
+
+For this part I have used the official EasyPanel guide: https://easypanel.io/docs
+
 Open a terminal inside the VM and run:
+
+curl -sSL https://get.docker.com | sh
+
+I had to install curl first, then I was able to run this
+
+Then I was able to continue
+
+However, in the guide the command to copy-paste was given in different lines so bash interpreted easypanel/easypanel as a script to run locally rather than a Docker image name:
+
+docker run --rm -it \
+  -v /etc/easypanel:/etc/easypanel \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  easypanel/easypanel setup
+
+I then asked support to Claude.ai and created the same command in just one line:
+  
+sudo docker run --rm -it -v /etc/easypanel:/etc/easypanel -v /var/run/docker.sock:/var/run/docker.sock:ro easypanel/easypanel setup
+
+In case this method doesn't work, AI has also given me the following commands:
 
 ```bash
 sudo apt update
@@ -60,11 +85,6 @@ echo \
 sudo apt update
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 sudo systemctl enable --now docker
-```
-
-### 4. Install EasyPanel
-```bash
-sudo docker run --rm -it -v /etc/easypanel:/etc/easypanel -v /var/run/docker.sock:/var/run/docker.sock:ro easypanel/easypanel setup
 ```
 
 Access EasyPanel inside the VM at: `http://localhost:3000`
@@ -165,11 +185,12 @@ curl -H "Host: n8n.localhost" http://127.0.0.1:8080
 - [EasyPanel Documentation](https://easypanel.io/docs)
 - [VirtualBox Manual](https://www.virtualbox.org/manual/)
 - [Docker Documentation](https://docs.docker.com)
-
+- IA: Claude.ai
+- N8N tips and info from Raiola Networks course (in Spanish) (https://cursos.raiola.link/)
 ---
 
 ## 👤 Author
 
 **Dario Gambino**  
 Cloud Engineering & DevOps enthusiast | AWS Cloud Support Specialist in progress | AZ-900 certified  
-[LinkedIn](https://linkedin.com/in/) • [GitHub](https://github.com/)
+[LinkedIn](https://www.linkedin.com/in/dario-gambino/) • [GitHub](https://github.com/d-gam/portfolio)
