@@ -109,6 +109,7 @@ Organised/
 - [n8n](https://n8n.io) — workflow automation
 - [node-imap](https://github.com/mscdex/node-imap) — IMAP client for Node.js
 - [mailparser](https://nodemailer.com/extras/mailparser/) — email header parsing
+- Claude.ai - AI supported me with structure and coding
 
 ## License
 
