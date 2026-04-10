@@ -1,0 +1,200 @@
+{
+  "name": "Email sorting automation - pub",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        -160
+      ],
+      "id": "b59556f0-3276-417d-83fd-f8daf56ac497",
+      "name": "When clicking ‘Execute workflow’",
+      "notesInFlow": true,
+      "notes": "Run this manually whenever you want to organise your inbox. Triggers the full pipeline on demand."
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        192,
+        -160
+      ],
+      "id": "845e6a1c-719d-4f8c-8210-414f5f46e0fa",
+      "name": "Loop Over Items",
+      "notesInFlow": true,
+      "notes": "Iterates through each domain group one at a time. Batch size 1 ensures folders are created and emails moved cleanly before moving to the next group."
+    },
+    {
+      "parameters": {
+        "jsCode": "const Imap = require('imap');\nconst { simpleParser } = require('mailparser');\n\nconst imap = new Imap({\n  user: 'your-email-address',      // your email\n  password: 'your-password',         // your password\n  host: 'your-imap-settings',    // your IMAP host\n  port: 993,\n  tls: true,\n  tlsOptions: { rejectUnauthorized: false }\n});\n\nconst emails = await new Promise((resolve, reject) => {\n  const results = [];\n\n  imap.once('ready', () => {\n    imap.openBox('INBOX', false, (err) => {\n      if (err) return reject(err);\n\n      imap.search(['ALL'], (err, uids) => {\n        if (err) return reject(err);\n        if (!uids.length) return resolve([]);\n\n        const slice = uids.slice(0, 200);\n\n        const f = imap.fetch(slice, {\n          bodies: 'HEADER',\n          struct: true\n        });\n\n        f.on('message', (msg, seqno) => {\n          msg.on('body', (stream) => {\n            simpleParser(stream, (err, parsed) => {\n              if (!err) {\n                results.push({\n                  uid: slice[seqno - 1],\n                  from: parsed.from?.text ?? 'unknown',\n                  subject: parsed.subject ?? '(no subject)',\n                  date: parsed.date ?? null\n                });\n              }\n            });\n          });\n        });\n\n        f.once('end', () => {\n          // wait for all simpleParser callbacks to finish\n          setTimeout(() => {\n            imap.end();\n            resolve(results);\n          }, 3000);\n        });\n\n        f.once('error', reject);\n      });\n    });\n  });\n\n  imap.once('error', reject);\n  imap.connect();\n});\n\nreturn emails.map(e => ({ json: e }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        -160
+      ],
+      "id": "a8dac89d-2cbd-4db3-bc05-cc8729786d23",
+      "name": "Code1",
+      "notesInFlow": true,
+      "notes": "IMAP fetch code\n\nConnects to the mail server via IMAP and fetches the 50 most recent emails from INBOX. Returns uid, from, subject and date for each email. Increase slice size once tested."
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const from = item.json.from ?? '';\n  const match = from.match(/@([\\w.-]+)/);\n  const domain = match ? match[1].toLowerCase() : 'unknown';\n\n  return {\n    json: {\n      ...item.json,\n      domain\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        -160
+      ],
+      "id": "358b1760-d0bd-42b5-8e24-fd810051e3ae",
+      "name": "Code2",
+      "notesInFlow": true,
+      "notes": "Extract Code: Extracts the sender domain from the From header of each email. e.g. newsletter@amazon.es becomes amazon.es. Adds a domain field to each item."
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst groups = {};\nfor (const item of items) {\n  const domain = item.json.domain ?? 'unknown';\n  const uid = item.json.uid; // must be 'uid' not 'uids'\n\n  if (uid === undefined || uid === null) continue;\n  \n  if (!groups[domain]) groups[domain] = [];\n  groups[domain].push(uid);\n}\n\n// Log to verify\nconsole.log('Groups found:', Object.keys(groups));\nconsole.log('Sample:', JSON.stringify(Object.entries(groups)[0]));\n\nreturn Object.entries(groups).map(([domain, uids]) => ({\n  json: { domain, uids }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        -160
+      ],
+      "id": "1a8f67ee-753b-4201-81bb-11710769aa3b",
+      "name": "Code3",
+      "notesInFlow": true,
+      "notes": "Gropuing Code: Groups all emails by sender domain into a map of { domain, uids }. One item per domain group is output, ready for the loop."
+    },
+    {
+      "parameters": {
+        "jsCode": "const Imap = require('imap');\n\nconst domain = $input.first().json.domain;\nconst uids = $input.first().json.uids;\nconst folderName = `Organised/${domain}`;\n\nconst imap = new Imap({\n  user: 'your-email-address',      // your email\n  password: 'your-password',         // your password\n  host: 'your-imap-settings',    // your IMAP host\n  port: 993,\n  tls: true,\n  tlsOptions: { rejectUnauthorized: false }\n});\n\nawait new Promise((resolve) => {\n  imap.once('ready', () => {\n    imap.addBox(folderName, () => {\n      imap.end();\n      resolve();\n    });\n  });\n  imap.once('error', () => resolve()); // ignore errors, folder may exist\n  imap.connect();\n});\n\nreturn [{ json: { domain, folderName, uids } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        -144
+      ],
+      "id": "5de53884-910c-4ad2-9b13-c02776b5db81",
+      "name": "Code4",
+      "notesInFlow": true,
+      "notes": "Create Email Folder\n\n\n\nCreates an IMAP subfolder under Organised/ for the current domain group if it does not already exist. e.g. Organised/amazon.es"
+    },
+    {
+      "parameters": {
+        "jsCode": "const Imap = require('imap');\n\nconst domain = $input.first().json.domain;\nconst folderName = $input.first().json.folderName;\nconst uids = $input.first().json.uids\n  .flat()\n  .map(u => parseInt(u))\n  .filter(u => !isNaN(u));\n\nif (!uids.length) {\n  return [{ json: { done: true, domain, moved: 0 } }];\n}\n\nconst imap = new Imap({\n  user: 'your-email-address',      // your email\n  password: 'your-password',         // your password\n  host: 'your-imap-settings',    // your IMAP host\n  port: 993,\n  tls: true,\n  tlsOptions: { rejectUnauthorized: false }\n});\n\nawait new Promise((resolve, reject) => {\n  imap.once('ready', () => {\n    imap.openBox('INBOX', false, (err) => {\n      if (err) return reject(err);\n\n      // Try MOVE first, fall back to COPY + DELETE\n      imap.move(uids, folderName, (moveErr) => {\n        if (!moveErr) {\n          imap.end();\n          return resolve();\n        }\n\n        // Fallback: COPY then DELETE\n        imap.copy(uids, folderName, (copyErr) => {\n          if (copyErr) return reject(copyErr);\n\n          imap.addFlags(uids, '\\\\Deleted', (flagErr) => {\n            if (flagErr) return reject(flagErr);\n\n            imap.expunge((expErr) => {\n              if (expErr) return reject(expErr);\n              imap.end();\n              resolve();\n            });\n          });\n        });\n      });\n    });\n  });\n\n  imap.once('error', reject);\n  imap.connect();\n});\n\nreturn [{ json: { done: true, domain, moved: uids.length } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        112
+      ],
+      "id": "76b86495-a7ab-4f19-833e-771669ce212d",
+      "name": "Code5",
+      "notesInFlow": true,
+      "notes": "Move Emails + Delete: Moves all emails belonging to the current domain group from INBOX into its Organised/ subfolder. Falls back to COPY + DELETE if the mail server does not support MOVE."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Code4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code4": {
+      "main": [
+        [
+          {
+            "node": "Code5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code5": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4edd8168-cff9-475e-95cb-e46b87550bf2",
+  "meta": {
+    "instanceId": "a060c6aca3b05aaf6690408617ff201eec7106787604ded4b11419e8ad25c064"
+  },
+  "id": "MqMQOKOK37xQHtjB",
+  "tags": []
+}
