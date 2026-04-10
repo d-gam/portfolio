@@ -1,0 +1,1 @@
+// declares all resources
