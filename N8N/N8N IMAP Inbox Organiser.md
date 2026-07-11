@@ -24,6 +24,17 @@ Manual Trigger
                         └── Code node: Move emails to folder
                             └── (back to loop)
 ```
+## Design decisions
+
+A few choices in this workflow were deliberate, not default:
+
+- **Batch size 1 in the loop, not parallel processing.** Creating an IMAP folder and moving emails into it are two sequential operations on a stateful mail server. Running domain groups in parallel risks folder-creation race conditions or partial moves if two groups touch the mailbox at once. Processing one domain at a time trades speed for reliability — acceptable for a manually-triggered, on-demand tool.
+
+- **MOVE with a COPY + flag-as-deleted + EXPUNGE fallback.** Not every IMAP server implements the `MOVE` extension (RFC 6851) — some older or self-hosted mail servers only support the original COPY/DELETE pattern. Rather than assume the target server supports MOVE, the workflow tries it first and falls back automatically, so the same workflow works across Gmail, Outlook, and less common self-hosted setups without configuration changes.
+
+- **Raw `imap`/`mailparser` npm packages instead of a pre-built n8n Email node.** n8n's native email nodes don't expose folder creation or the MOVE/COPY-DELETE fallback logic needed here. Working directly against the IMAP protocol gave full control over folder management at the cost of requiring a self-hosted instance with external npm packages enabled — a deliberate trade-off of portability for capability.
+
+- **Domain-based grouping over AI classification.** Sender domain is a reliable, zero-cost signal that needs no external API calls, no API keys, and no per-email cost — appropriate for a bulk-processing tool that might touch hundreds of emails per run. An LLM-based classifier could categorize by *intent* rather than sender, but that's a meaningfully different (and paid-API-dependent) tool, not a free upgrade to this one.
 
 ## Requirements
 
