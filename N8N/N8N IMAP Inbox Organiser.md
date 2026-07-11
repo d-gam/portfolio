@@ -56,28 +56,25 @@ Import the workflow JSON into your n8n instance via **Workflows → Import**.
 
 ### 2. Configure your IMAP credentials
 
-In each of the three Code nodes that connect to your mail server, update the following values:
+Credentials are not stored in the workflow — they're read from environment variables via a Config node at the start of the workflow. This keeps secrets out of the JSON entirely, so the workflow file is safe to share, publish, or sell without editing it per-user.
+
+Add the following to your .env file (or your hosting panel's environment variables, e.g. EasyPanel):
 
 ```js
-const imap = new Imap({
-  user: 'you@yourdomain.com',
-  password: 'yourpassword',
-  host: 'imap.yourprovider.com',
-  port: 993,
-  tls: true,
-  tlsOptions: { rejectUnauthorized: false }
-});
+IMAP_USER=you@yourdomain.com
+IMAP_PASSWORD=yourpassword
+IMAP_HOST=imap.yourprovider.com
 ```
+
+Restart n8n after adding these. The Config node reads them via $env.IMAP_USER, $env.IMAP_PASSWORD, and $env.IMAP_HOST and passes them down to every Code node that needs to open an IMAP connection.
 
 Common IMAP host values:
 
-| Provider | Host |
-|---|---|
-| Gmail | imap.gmail.com |
-| Outlook / Hotmail | outlook.office365.com |
-| Yahoo | imap.mail.yahoo.com |
-| Fastmail | imap.fastmail.com |
-| cPanel / custom domain | mail.yourdomain.com |
+ProviderHostGmailimap.gmail.comOutlook / Hotmailoutlook.office365.comYahooimap.mail.yahoo.comFastmailimap.fastmail.comcPanel / custom domainmail.yourdomain.com
+
+
+Note: if your n8n instance has N8N_BLOCK_ENV_ACCESS_IN_NODE=true set, expressions can't read $env inside nodes. Unset it or set it to false for this workflow to work.
+
 
 ### 3. Adjust the fetch slice size
 
@@ -111,6 +108,7 @@ Organised/
 ## Notes
 
 - The workflow is triggered **manually** — it does not run automatically in the background. Run it whenever your inbox needs organising.
+- Credentials are never hardcoded in the workflow file. If you fork or resell this template, no per-user editing of Code nodes is required just set the three environment variables above.
 - Emails are **moved**, not copied — your INBOX will be cleared as folders are populated.
 - If a folder already exists, the workflow skips creation and moves emails directly.
 - To process your full inbox, increase the slice size gradually and monitor for timeouts. If you hit runner timeout errors, add the following to your environment: `N8N_RUNNERS_HEARTBEAT_INTERVAL=60`
